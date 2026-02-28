@@ -164,6 +164,23 @@ export async function getRecordCount(
 }
 
 /**
+ * Reset the AUTOINCREMENT counter for the seniors table.
+ * Call this only when the table is empty so the next insert gets ID = 1.
+ * SQLite stores the counter in the sqlite_sequence system table.
+ */
+export async function resetSeniorSequence(
+    db: SQLite.SQLiteDatabase
+): Promise<void> {
+    // Only reset if table is actually empty
+    const count = await getRecordCount(db);
+    if (count === 0) {
+        await db.runAsync(
+            `DELETE FROM sqlite_sequence WHERE name = 'seniors'`
+        );
+    }
+}
+
+/**
  * Get one senior record by ID.
  */
 export async function getSeniorById(
@@ -175,6 +192,23 @@ export async function getSeniorById(
         [id]
     );
     return row ?? null;
+}
+
+/**
+ * Check if a senior with the same first name and last name already exists.
+ * Used during CSV import to prevent duplicates.
+ */
+export async function seniorExists(
+    db: SQLite.SQLiteDatabase,
+    firstName: string,
+    lastName: string
+): Promise<boolean> {
+    const row = await db.getFirstAsync<{ count: number }>(
+        `SELECT COUNT(*) as count FROM seniors
+         WHERE LOWER(first_name) = LOWER(?) AND LOWER(last_name) = LOWER(?)`,
+        [firstName.trim(), lastName.trim()]
+    );
+    return (row?.count ?? 0) > 0;
 }
 
 /**

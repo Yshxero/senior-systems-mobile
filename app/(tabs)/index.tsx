@@ -27,6 +27,7 @@ import {
     getRecordCount,
 } from '../../lib/database';
 import { exportRecordsToCsv } from '../../lib/exportCsv';
+import { importRecordsFromCsv } from '../../lib/importCsv';
 import RecordCard from '../../components/RecordCard';
 import EmptyState from '../../components/EmptyState';
 
@@ -43,6 +44,7 @@ export default function RecordsListScreen() {
     const [isLoading, setIsLoading] = useState(true);
     const [isRefreshing, setIsRefreshing] = useState(false);
     const [isExporting, setIsExporting] = useState(false);
+    const [isImporting, setIsImporting] = useState(false);
 
     // Debounce timer reference — does NOT cause re-renders
     const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -131,6 +133,30 @@ export default function RecordsListScreen() {
     const handleRefresh = () => {
         setIsRefreshing(true);
         loadRecords(searchQuery, pensionFilter);
+    };
+
+    /** Import records from a CSV file. */
+    const handleImport = async () => {
+        if (!db) return;
+        setIsImporting(true);
+        try {
+            const result = await importRecordsFromCsv(db);
+            if (result === null) return; // user cancelled
+
+            const msg = [
+                `✅ Imported: ${result.imported} record${result.imported !== 1 ? 's' : ''}`,
+                result.duplicates > 0 ? `🔁 Duplicates skipped: ${result.duplicates}` : null,
+                result.skipped > 0 ? `⚠️ Invalid rows skipped: ${result.skipped}` : null,
+                result.errors.length > 0 ? `\nErrors:\n${result.errors.slice(0, 3).join('\n')}` : null,
+            ].filter(Boolean).join('\n');
+
+            Alert.alert('Import Complete', msg);
+            await loadRecords(searchQuery, pensionFilter);
+        } catch (e: any) {
+            Alert.alert('Import Error', e?.message ?? 'Failed to import CSV.');
+        } finally {
+            setIsImporting(false);
+        }
     };
 
     /** Export ALL records (alphabetical order) to CSV. */
@@ -266,6 +292,23 @@ export default function RecordsListScreen() {
                 keyboardShouldPersistTaps="handled"
             />
 
+            {/* Import CSV button */}
+            <TouchableOpacity
+                style={styles.importFab}
+                onPress={handleImport}
+                activeOpacity={0.8}
+                disabled={isImporting}
+            >
+                {isImporting ? (
+                    <ActivityIndicator size="small" color="#fff" />
+                ) : (
+                    <>
+                        <Ionicons name="cloud-upload-outline" size={22} color="#fff" />
+                        <Text style={styles.importFabText}>Import CSV</Text>
+                    </>
+                )}
+            </TouchableOpacity>
+
             {/* Export to CSV — Floating Action Button */}
             {totalCount > 0 && (
                 <TouchableOpacity
@@ -392,5 +435,27 @@ const styles = StyleSheet.create({
         fontSize: 14,
         fontWeight: '700',
         color: Colors.text,
+    },
+    importFab: {
+        position: 'absolute',
+        right: 16,
+        bottom: 80, // sits above the export FAB
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 8,
+        backgroundColor: '#16a34a', // green
+        paddingHorizontal: 20,
+        paddingVertical: 14,
+        borderRadius: 28,
+        elevation: 6,
+        shadowColor: '#16a34a',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 8,
+    },
+    importFabText: {
+        fontSize: 14,
+        fontWeight: '700',
+        color: '#fff',
     },
 });

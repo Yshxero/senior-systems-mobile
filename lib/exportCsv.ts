@@ -27,8 +27,8 @@ function escapeCsvField(value: string): string {
 /** Convert numeric month ("01") to short month name ("Jan"). */
 function monthName(month: string): string {
     const NAMES = [
-        'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-        'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+        'January', 'February', 'March', 'April', 'May', 'June',
+        'July', 'August', 'September', 'October', 'November', 'December'
     ];
     const index = Math.max(0, Math.min(11, Number(month) - 1));
     return NAMES[index] || month;

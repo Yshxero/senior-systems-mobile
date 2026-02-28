@@ -21,7 +21,6 @@ import { updateSenior, getSeniorById, NewSeniorRecord } from '../lib/database';
 import FormField from '../components/FormField';
 import PickerField from '../components/PickerField';
 
-// reuse your option lists (copy from add.tsx)
 const MONTHS = [
     '01 - January', '02 - February', '03 - March', '04 - April',
     '05 - May', '06 - June', '07 - July', '08 - August',

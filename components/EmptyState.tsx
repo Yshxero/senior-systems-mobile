@@ -1,19 +1,10 @@
-/**
- * EmptyState.tsx
- *
- * A friendly empty state component shown when there are no records.
- * Displays an icon, message, and a prompt to add the first record.
- */
-
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import Colors from '../constants/Colors';
 
 interface EmptyStateProps {
-    /** Main message */
     title?: string;
-    /** Subtitle / description */
     subtitle?: string;
 }
 
@@ -23,12 +14,9 @@ export default function EmptyState({
 }: EmptyStateProps) {
     return (
         <View style={styles.container}>
-            {/* Large icon */}
             <View style={styles.iconCircle}>
                 <Ionicons name="people-outline" size={48} color={Colors.primary} />
             </View>
-
-            {/* Text */}
             <Text style={styles.title}>{title}</Text>
             <Text style={styles.subtitle}>{subtitle}</Text>
         </View>

@@ -1,45 +1,28 @@
-/**
- * database.ts
- *
- * SQLite database layer for storing senior citizen records.
- * Uses expo-sqlite for fully offline, local data persistence.
- *
- * All functions are async and use parameterized queries to prevent SQL injection.
- */
-
 import * as SQLite from 'expo-sqlite';
 
-// ─── Types ───────────────────────────────────────────────────────────────────
-
-/** Shape of a single senior citizen record */
 export interface SeniorRecord {
     id: number;
     last_name: string;
     first_name: string;
     middle_name: string;
-    ext_name: string;        // e.g. Jr., Sr., III
-    birthday_month: string;  // "01" – "12"
-    birthday_day: string;    // "01" – "31"
-    birthday_year: string;   // e.g. "1955"
-    sex: string;             // "Male" | "Female"
-    civil_status: string;    // Single, Married, Widowed, Separated, Divorced
+    ext_name: string;
+    birthday_month: string;
+    birthday_day: string;
+    birthday_year: string;
+    sex: string;
+    civil_status: string;
     cellphone_number: string;
     national_id: string;
     occupation: string;
-    pension: string;         // optional pension info, e.g. "SSS", "GSIS", "N/A"
-    created_at: string;      // ISO timestamp
+    pension: string;
+    created_at: string;
 }
 
-/** Data required to create a new record (id & created_at are auto-generated) */
 export type NewSeniorRecord = Omit<SeniorRecord, 'id' | 'created_at'>;
 
-// ─── Database Initialization ─────────────────────────────────────────────────
-
-/** Open (or create) the SQLite database and set up the table */
 export async function getDatabase(): Promise<SQLite.SQLiteDatabase> {
     const db = await SQLite.openDatabaseAsync('seniors.db');
 
-    // Create the table if it doesn't exist
     await db.execAsync(`
     CREATE TABLE IF NOT EXISTS seniors (
       id              INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -60,22 +43,15 @@ export async function getDatabase(): Promise<SQLite.SQLiteDatabase> {
     );
   `);
 
-    // Add 'pension' column if it doesn't exist yet (for existing databases)
     try {
         await db.execAsync(`ALTER TABLE seniors ADD COLUMN pension TEXT DEFAULT ''`);
     } catch {
-        // Column already exists — safe to ignore
+        // Column already exists
     }
 
     return db;
 }
 
-// ─── CRUD Operations ─────────────────────────────────────────────────────────
-
-/**
- * Insert a new senior citizen record into the database.
- * Returns the ID of the newly created row.
- */
 export async function insertSenior(
     db: SQLite.SQLiteDatabase,
     record: NewSeniorRecord
@@ -106,9 +82,6 @@ export async function insertSenior(
     return result.lastInsertRowId;
 }
 
-/**
- * Retrieve all senior records, sorted alphabetically by last name then first name.
- */
 export async function getAllSeniors(
     db: SQLite.SQLiteDatabase
 ): Promise<SeniorRecord[]> {
@@ -118,10 +91,6 @@ export async function getAllSeniors(
     return rows;
 }
 
-/**
- * Search records by matching a query against name, cellphone, national ID, or pension.
- * Uses LIKE with wildcards for partial matching. Results sorted alphabetically.
- */
 export async function searchSeniors(
     db: SQLite.SQLiteDatabase,
     query: string
@@ -141,9 +110,6 @@ export async function searchSeniors(
     return rows;
 }
 
-/**
- * Delete a single senior record by its ID.
- */
 export async function deleteSenior(
     db: SQLite.SQLiteDatabase,
     id: number
@@ -151,9 +117,6 @@ export async function deleteSenior(
     await db.runAsync('DELETE FROM seniors WHERE id = ?', [id]);
 }
 
-/**
- * Get the total count of records in the database.
- */
 export async function getRecordCount(
     db: SQLite.SQLiteDatabase
 ): Promise<number> {
@@ -163,15 +126,9 @@ export async function getRecordCount(
     return result?.count ?? 0;
 }
 
-/**
- * Reset the AUTOINCREMENT counter for the seniors table.
- * Call this only when the table is empty so the next insert gets ID = 1.
- * SQLite stores the counter in the sqlite_sequence system table.
- */
 export async function resetSeniorSequence(
     db: SQLite.SQLiteDatabase
 ): Promise<void> {
-    // Only reset if table is actually empty
     const count = await getRecordCount(db);
     if (count === 0) {
         await db.runAsync(
@@ -180,9 +137,6 @@ export async function resetSeniorSequence(
     }
 }
 
-/**
- * Get one senior record by ID.
- */
 export async function getSeniorById(
     db: SQLite.SQLiteDatabase,
     id: number
@@ -194,10 +148,6 @@ export async function getSeniorById(
     return row ?? null;
 }
 
-/**
- * Check if a senior with the same first name and last name already exists.
- * Used during CSV import to prevent duplicates.
- */
 export async function seniorExists(
     db: SQLite.SQLiteDatabase,
     firstName: string,
@@ -211,9 +161,6 @@ export async function seniorExists(
     return (row?.count ?? 0) > 0;
 }
 
-/**
- * Update an existing senior record.
- */
 export async function updateSenior(
     db: SQLite.SQLiteDatabase,
     id: number,

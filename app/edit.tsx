@@ -1,7 +1,3 @@
-/**
- * edit.tsx — Edit Record Screen
- */
-
 import React, { useState, useContext, useEffect } from 'react';
 import {
     View,
@@ -53,7 +49,6 @@ export default function EditRecordScreen() {
     const [form, setForm] = useState<any>(null);
     const [isSaving, setIsSaving] = useState(false);
 
-    // 🔥 LOAD RECORD
     useEffect(() => {
         const load = async () => {
             if (!db || !id) return;
@@ -90,7 +85,6 @@ export default function EditRecordScreen() {
         setForm((prev: any) => ({ ...prev, [field]: value }));
     };
 
-    // 🔥 SAVE UPDATE
     const handleSave = async () => {
         if (!db || !form) return;
 
@@ -173,7 +167,6 @@ export default function EditRecordScreen() {
                     onChangeText={(t) => updateField('extName', t)}
                 />
 
-                {/* Birthday */}
                 <View style={styles.sectionHeader}>
                     <Ionicons name="calendar-outline" size={24} color={Colors.primary} />
                     <Text style={styles.sectionTitle}>Birthday</Text>
@@ -208,7 +201,6 @@ export default function EditRecordScreen() {
                     </View>
                 </View>
 
-                {/* Demographics */}
                 <View style={styles.sectionHeader}>
                     <Ionicons name="people-outline" size={24} color={Colors.primary} />
                     <Text style={styles.sectionTitle}>Demographics</Text>
@@ -234,7 +226,6 @@ export default function EditRecordScreen() {
                     </View>
                 </View>
 
-                {/* Contact */}
                 <View style={styles.sectionHeader}>
                     <Ionicons name="card-outline" size={24} color={Colors.primary} />
                     <Text style={styles.sectionTitle}>Contact & Identification</Text>
@@ -258,7 +249,6 @@ export default function EditRecordScreen() {
                     onChangeText={(t) => updateField('occupation', t)}
                 />
 
-                {/* Pension Section */}
                 <View style={styles.sectionHeader}>
                     <Ionicons name="wallet-outline" size={24} color={Colors.primary} />
                     <Text style={styles.sectionTitle}>Pension</Text>
@@ -271,7 +261,6 @@ export default function EditRecordScreen() {
                     onSelect={(v) => updateField('pension', v)}
                 />
 
-                {/* Actions */}
                 <View style={styles.actions}>
                     <TouchableOpacity
                         style={styles.saveButton}

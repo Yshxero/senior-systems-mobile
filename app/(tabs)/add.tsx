@@ -1,14 +1,3 @@
-/**
- * add.tsx — Add Record Screen
- *
- * Form screen for adding a new senior citizen record.
- * Includes:
- * - Text inputs for name fields, cellphone, national ID, occupation
- * - Dropdown pickers for birthday (month/day/year), sex, and civil status
- * - Validation (required fields, format checks)
- * - Success alert and navigation back to the Records tab after saving
- */
-
 import React, { useState, useContext, useRef } from 'react';
 import {
     View,
@@ -28,24 +17,20 @@ import { insertSenior, NewSeniorRecord } from '../../lib/database';
 import FormField from '../../components/FormField';
 import PickerField from '../../components/PickerField';
 
-// ─── Option lists for pickers ────────────────────────────────────────────────
-
 const MONTHS = [
     '01 - January', '02 - February', '03 - March', '04 - April',
     '05 - May', '06 - June', '07 - July', '08 - August',
     '09 - September', '10 - October', '11 - November', '12 - December',
 ];
 
-// Generate days 01–31
 const DAYS = Array.from({ length: 31 }, (_, i) =>
     String(i + 1).padStart(2, '0')
 );
 
-// Generate years from 1920 to current year
 const currentYear = new Date().getFullYear();
 const YEARS = Array.from(
     { length: currentYear - 1919 },
-    (_, i) => String(currentYear - i)  // Most recent first
+    (_, i) => String(currentYear - i)
 );
 
 const SEX_OPTIONS = ['Male', 'Female'];
@@ -59,8 +44,6 @@ const CIVIL_STATUS_OPTIONS = [
 ];
 
 const PENSION_OPTIONS = ['SSS', 'GSIS', 'OSCA', 'N/A'];
-
-// ─── Form State Type ─────────────────────────────────────────────────────────
 
 interface FormState {
     lastName: string;
@@ -82,8 +65,6 @@ interface FormErrors {
     [key: string]: string | undefined;
 }
 
-// ─── Initial / empty form values ─────────────────────────────────────────────
-
 const INITIAL_FORM: FormState = {
     lastName: '',
     firstName: '',
@@ -104,30 +85,20 @@ export default function AddRecordScreen() {
     const db = useContext(DatabaseContext);
     const router = useRouter();
 
-    // Form state
     const [form, setForm] = useState<FormState>({ ...INITIAL_FORM });
     const [errors, setErrors] = useState<FormErrors>({});
     const [isSaving, setIsSaving] = useState(false);
 
-    /**
-     * Update a single field in the form state.
-     */
     const updateField = (field: keyof FormState, value: string) => {
         setForm((prev) => ({ ...prev, [field]: value }));
-        // Clear error for this field when user starts typing
         if (errors[field]) {
             setErrors((prev) => ({ ...prev, [field]: undefined }));
         }
     };
 
-    /**
-     * Validate the form and return true if valid.
-     * Sets error messages on invalid fields.
-     */
     const validate = (): boolean => {
         const newErrors: FormErrors = {};
 
-        // Required field checks
         if (!form.lastName.trim()) newErrors.lastName = 'Last name is required';
         if (!form.firstName.trim()) newErrors.firstName = 'First name is required';
         if (!form.birthdayMonth) newErrors.birthdayMonth = 'Month is required';
@@ -136,7 +107,6 @@ export default function AddRecordScreen() {
         if (!form.sex) newErrors.sex = 'Sex is required';
         if (!form.civilStatus) newErrors.civilStatus = 'Civil status is required';
 
-        // Optional format checks
         if (form.cellphoneNumber.trim() && !/^[0-9+\-\s()]+$/.test(form.cellphoneNumber)) {
             newErrors.cellphoneNumber = 'Invalid phone number format';
         }
@@ -145,11 +115,7 @@ export default function AddRecordScreen() {
         return Object.keys(newErrors).length === 0;
     };
 
-    /**
-     * Save the record to the database.
-     */
     const handleSave = async () => {
-        // Validate first
         if (!validate()) {
             Alert.alert('Validation Error', 'Please fill in all required fields.');
             return;
@@ -163,13 +129,12 @@ export default function AddRecordScreen() {
         setIsSaving(true);
 
         try {
-            // Build the record object
             const record: NewSeniorRecord = {
                 last_name: form.lastName.trim(),
                 first_name: form.firstName.trim(),
                 middle_name: form.middleName.trim(),
                 ext_name: form.extName.trim(),
-                birthday_month: form.birthdayMonth.slice(0, 2), // Extract "01" from "01 - January"
+                birthday_month: form.birthdayMonth.slice(0, 2),
                 birthday_day: form.birthdayDay,
                 birthday_year: form.birthdayYear,
                 sex: form.sex,
@@ -182,7 +147,6 @@ export default function AddRecordScreen() {
 
             await insertSenior(db, record);
 
-            // Show success
             Alert.alert(
                 '✅ Record Saved',
                 `${record.first_name} ${record.last_name} has been added successfully.`,
@@ -190,7 +154,6 @@ export default function AddRecordScreen() {
                     {
                         text: 'OK',
                         onPress: () => {
-                            // Reset form and navigate to the records list
                             setForm({ ...INITIAL_FORM });
                             setErrors({});
                             router.navigate('/(tabs)');
@@ -206,9 +169,6 @@ export default function AddRecordScreen() {
         }
     };
 
-    /**
-     * Reset the form to its initial state.
-     */
     const handleReset = () => {
         Alert.alert('Reset Form', 'Are you sure you want to clear all fields?', [
             { text: 'Cancel', style: 'cancel' },
@@ -233,13 +193,11 @@ export default function AddRecordScreen() {
                 showsVerticalScrollIndicator={false}
                 keyboardShouldPersistTaps="handled"
             >
-                {/* Header Info */}
                 <View style={styles.sectionHeader}>
                     <Ionicons name="person-circle-outline" size={24} color={Colors.primary} />
                     <Text style={styles.sectionTitle}>Personal Information</Text>
                 </View>
 
-                {/* Name Fields */}
                 <FormField
                     label="Last Name"
                     required
@@ -273,7 +231,6 @@ export default function AddRecordScreen() {
                     autoCapitalize="characters"
                 />
 
-                {/* Birthday Section */}
                 <View style={styles.sectionHeader}>
                     <Ionicons name="calendar-outline" size={24} color={Colors.primary} />
                     <Text style={styles.sectionTitle}>Birthday</Text>
@@ -315,7 +272,6 @@ export default function AddRecordScreen() {
                     </View>
                 </View>
 
-                {/* Demographics Section */}
                 <View style={styles.sectionHeader}>
                     <Ionicons name="people-outline" size={24} color={Colors.primary} />
                     <Text style={styles.sectionTitle}>Demographics</Text>
@@ -346,7 +302,6 @@ export default function AddRecordScreen() {
                     </View>
                 </View>
 
-                {/* Contact & ID Section */}
                 <View style={styles.sectionHeader}>
                     <Ionicons name="card-outline" size={24} color={Colors.primary} />
                     <Text style={styles.sectionTitle}>Contact & Identification</Text>
@@ -375,7 +330,6 @@ export default function AddRecordScreen() {
                     autoCapitalize="words"
                 />
 
-                {/* Pension Section */}
                 <View style={styles.sectionHeader}>
                     <Ionicons name="wallet-outline" size={24} color={Colors.primary} />
                     <Text style={styles.sectionTitle}>Pension</Text>
@@ -389,9 +343,7 @@ export default function AddRecordScreen() {
                     onSelect={(value) => updateField('pension', value)}
                 />
 
-                {/* Action Buttons */}
                 <View style={styles.actions}>
-                    {/* Save Button */}
                     <TouchableOpacity
                         style={[styles.saveButton, isSaving ? styles.buttonDisabled : null]}
                         onPress={handleSave}
@@ -408,7 +360,6 @@ export default function AddRecordScreen() {
                         </Text>
                     </TouchableOpacity>
 
-                    {/* Reset Button */}
                     <TouchableOpacity
                         style={styles.resetButton}
                         onPress={handleReset}
@@ -473,7 +424,6 @@ const styles = StyleSheet.create({
         backgroundColor: Colors.primary,
         paddingVertical: 16,
         borderRadius: 14,
-        // Shadow
         elevation: 4,
         shadowColor: Colors.primary,
         shadowOffset: { width: 0, height: 4 },

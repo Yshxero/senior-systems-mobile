@@ -1,27 +1,19 @@
-/**
- * _layout.tsx (Tabs Layout)
- *
- * Defines the bottom tab navigator with two tabs:
- * 1. Records — list of all saved senior records
- * 2. Add Record — form to add a new record
- *
- * Uses @expo/vector-icons for tab icons and our custom color palette.
- */
-
 import React from 'react';
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Colors from '../../constants/Colors';
 
 export default function TabsLayout() {
+    const insets = useSafeAreaInsets();
+
     return (
         <Tabs
             screenOptions={{
-                // Header styling
                 headerStyle: {
                     backgroundColor: Colors.background,
-                    elevation: 0,        // Remove shadow on Android
-                    shadowOpacity: 0,    // Remove shadow on iOS
+                    elevation: 0,
+                    shadowOpacity: 0,
                     borderBottomWidth: 1,
                     borderBottomColor: Colors.border,
                 },
@@ -30,13 +22,12 @@ export default function TabsLayout() {
                     fontWeight: '700',
                     fontSize: 18,
                 },
-                // Tab bar styling
                 tabBarStyle: {
                     backgroundColor: Colors.background,
                     borderTopColor: Colors.border,
                     borderTopWidth: 1,
-                    height: 60,
-                    paddingBottom: 8,
+                    height: 60 + insets.bottom,
+                    paddingBottom: 8 + insets.bottom,
                     paddingTop: 8,
                 },
                 tabBarActiveTintColor: Colors.tabActive,
@@ -47,7 +38,6 @@ export default function TabsLayout() {
                 },
             }}
         >
-            {/* Tab 1: Records List */}
             <Tabs.Screen
                 name="index"
                 options={{
@@ -58,8 +48,6 @@ export default function TabsLayout() {
                     ),
                 }}
             />
-
-            {/* Tab 2: Add Record Form */}
             <Tabs.Screen
                 name="add"
                 options={{

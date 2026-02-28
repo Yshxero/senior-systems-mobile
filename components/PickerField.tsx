@@ -1,11 +1,3 @@
-/**
- * PickerField.tsx
- *
- * A custom dropdown/picker component that uses a Modal for selection.
- * Since Expo doesn't include a built-in Picker, we build our own
- * that works reliably on Android and looks consistent with our design.
- */
-
 import React, { useState } from 'react';
 import {
     View,
@@ -19,19 +11,12 @@ import { Ionicons } from '@expo/vector-icons';
 import Colors from '../constants/Colors';
 
 interface PickerFieldProps {
-    /** Label text displayed above the picker */
     label: string;
-    /** Whether this field is required (shows a red asterisk) */
     required?: boolean;
-    /** Currently selected value */
     value: string;
-    /** Placeholder text when no value is selected */
     placeholder?: string;
-    /** Array of options to choose from */
     options: string[];
-    /** Callback when an option is selected */
     onSelect: (value: string) => void;
-    /** Validation error message */
     error?: string;
 }
 
@@ -48,13 +33,11 @@ export default function PickerField({
 
     return (
         <View style={styles.container}>
-            {/* Label */}
             <View style={styles.labelRow}>
                 <Text style={styles.label}>{label}</Text>
                 {required && <Text style={styles.required}>*</Text>}
             </View>
 
-            {/* Trigger button */}
             <TouchableOpacity
                 style={[styles.trigger, error ? styles.triggerError : null]}
                 onPress={() => setVisible(true)}
@@ -75,10 +58,8 @@ export default function PickerField({
                 />
             </TouchableOpacity>
 
-            {/* Error */}
             {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
-            {/* Options Modal */}
             <Modal
                 transparent
                 visible={visible}

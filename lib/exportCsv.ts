@@ -1,21 +1,7 @@
-/**
- * exportCsv.ts
- *
- * Generates a CSV file from senior citizen records and shares it with the user.
- * Uses expo-file-system (SDK 54 File/Paths API) to write the file
- * and expo-sharing to open the share dialog.
- *
- * Records are exported in alphabetical order (A–Z by last name, handled by DB).
- */
-
 import { File as ExpoFile, Paths } from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 import { SeniorRecord } from './database';
 
-/**
- * Escape a CSV field value.
- * Wraps in double quotes if the value contains commas, quotes, or newlines.
- */
 function escapeCsvField(value: string): string {
     const str = value ?? '';
     if (str.includes(',') || str.includes('"') || str.includes('\n')) {
@@ -24,7 +10,6 @@ function escapeCsvField(value: string): string {
     return str;
 }
 
-/** Convert numeric month ("01") to short month name ("Jan"). */
 function monthName(month: string): string {
     const NAMES = [
         'January', 'February', 'March', 'April', 'May', 'June',
@@ -34,10 +19,6 @@ function monthName(month: string): string {
     return NAMES[index] || month;
 }
 
-/**
- * Convert an array of SeniorRecord objects into a CSV string.
- * Records should already be sorted alphabetically by the DB query.
- */
 function recordsToCsv(records: SeniorRecord[]): string {
     const headers = [
         'ID',
@@ -80,10 +61,6 @@ function recordsToCsv(records: SeniorRecord[]): string {
     return csvLines.join('\n');
 }
 
-/**
- * Export senior records as a CSV file and open the system share dialog.
- * Records are exported A–Z by last name (order from DB query).
- */
 export async function exportRecordsToCsv(records: SeniorRecord[]): Promise<void> {
     if (!records.length) {
         throw new Error('No records to export.');
@@ -91,12 +68,10 @@ export async function exportRecordsToCsv(records: SeniorRecord[]): Promise<void>
 
     const csvContent = recordsToCsv(records);
 
-    // Create a unique filename with timestamp
     const now = new Date();
     const timestamp = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}_${String(now.getHours()).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}`;
     const fileName = `senior_records_${timestamp}.csv`;
 
-    // Create and write the CSV file using the SDK 54 File API
     const csvFile = new ExpoFile(Paths.cache, fileName);
     if (csvFile.exists) {
         csvFile.delete();
@@ -104,13 +79,11 @@ export async function exportRecordsToCsv(records: SeniorRecord[]): Promise<void>
     csvFile.create();
     csvFile.write(csvContent);
 
-    // Check sharing support
     const isAvailable = await Sharing.isAvailableAsync();
     if (!isAvailable) {
         throw new Error('Sharing is not available on this device.');
     }
 
-    // Open system share sheet
     await Sharing.shareAsync(csvFile.uri, {
         mimeType: 'text/csv',
         dialogTitle: 'Export Senior Records',

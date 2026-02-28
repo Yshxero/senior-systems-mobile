@@ -1,7 +1,3 @@
-/**
- * index.tsx — Records List Screen
- */
-
 import React, { useState, useCallback, useContext, useEffect, useRef } from 'react';
 import {
     View,
@@ -31,7 +27,6 @@ import { importRecordsFromCsv } from '../../lib/importCsv';
 import RecordCard from '../../components/RecordCard';
 import EmptyState from '../../components/EmptyState';
 
-// ─── Pension filter options ───────────────────────────────────────────────────
 const PENSION_FILTERS = ['All', 'SSS', 'GSIS', 'OSCA', 'N/A'];
 
 export default function RecordsListScreen() {
@@ -46,14 +41,8 @@ export default function RecordsListScreen() {
     const [isExporting, setIsExporting] = useState(false);
     const [isImporting, setIsImporting] = useState(false);
 
-    // Debounce timer reference — does NOT cause re-renders
     const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-    /**
-     * Load records from the database.
-     * If a search query is present, filter results; otherwise load all.
-     * Apply pension filter client-side after fetching.
-     */
     const loadRecords = useCallback(async (query: string, pension: string) => {
         if (!db) return;
         try {
@@ -61,14 +50,12 @@ export default function RecordsListScreen() {
                 ? await searchSeniors(db, query.trim())
                 : await getAllSeniors(db);
 
-            // Apply pension filter if not "All"
             const filtered = pension === 'All'
                 ? data
                 : data.filter(r => r.pension === pension);
 
             setRecords(filtered);
 
-            // Total unfiltered count
             const count = await getRecordCount(db);
             setTotalCount(count);
         } catch (error) {
@@ -80,7 +67,6 @@ export default function RecordsListScreen() {
         }
     }, [db]);
 
-    // Reload every time screen comes into focus
     useFocusEffect(
         useCallback(() => {
             setIsLoading(true);
@@ -88,36 +74,27 @@ export default function RecordsListScreen() {
         }, [loadRecords, searchQuery, pensionFilter])
     );
 
-    /**
-     * Handle search input — debounced so it waits 300ms after the user
-     * stops typing. Does NOT dismiss the keyboard (no blur called).
-     */
     const handleSearch = (text: string) => {
         setSearchQuery(text);
 
-        // Cancel previous timer
         if (debounceTimer.current) clearTimeout(debounceTimer.current);
 
-        // Schedule new load
         debounceTimer.current = setTimeout(() => {
             loadRecords(text, pensionFilter);
         }, 300);
     };
 
-    // Clear debounce on unmount
     useEffect(() => {
         return () => {
             if (debounceTimer.current) clearTimeout(debounceTimer.current);
         };
     }, []);
 
-    /** Pension filter chip press */
     const handlePensionFilter = (filter: string) => {
         setPensionFilter(filter);
         loadRecords(searchQuery, filter);
     };
 
-    /** Handle deleting a record. */
     const handleDelete = async (id: number) => {
         if (!db) return;
         try {
@@ -129,19 +106,17 @@ export default function RecordsListScreen() {
         }
     };
 
-    /** Pull-to-refresh. */
     const handleRefresh = () => {
         setIsRefreshing(true);
         loadRecords(searchQuery, pensionFilter);
     };
 
-    /** Import records from a CSV file. */
     const handleImport = async () => {
         if (!db) return;
         setIsImporting(true);
         try {
             const result = await importRecordsFromCsv(db);
-            if (result === null) return; // user cancelled
+            if (result === null) return;
 
             const msg = [
                 `✅ Imported: ${result.imported} record${result.imported !== 1 ? 's' : ''}`,
@@ -159,7 +134,6 @@ export default function RecordsListScreen() {
         }
     };
 
-    /** Export ALL records (alphabetical order) to CSV. */
     const handleExport = async () => {
         if (!db) return;
 
@@ -195,7 +169,6 @@ export default function RecordsListScreen() {
 
     return (
         <View style={styles.container}>
-            {/* Search bar */}
             <View style={styles.searchContainer}>
                 <View style={styles.searchBar}>
                     <Ionicons name="search-outline" size={18} color={Colors.textSecondary} />
@@ -207,7 +180,6 @@ export default function RecordsListScreen() {
                         onChangeText={handleSearch}
                         selectionColor={Colors.primary}
                         returnKeyType="search"
-                        // Do NOT use onSubmitEditing to dismiss keyboard
                         blurOnSubmit={false}
                     />
                     {searchQuery.length > 0 && (
@@ -220,7 +192,6 @@ export default function RecordsListScreen() {
                     )}
                 </View>
 
-                {/* Pension filter chips */}
                 <ScrollView
                     horizontal
                     showsHorizontalScrollIndicator={false}
@@ -249,7 +220,6 @@ export default function RecordsListScreen() {
                     ))}
                 </ScrollView>
 
-                {/* Record count badge */}
                 <View style={styles.countBadge}>
                     <Text style={styles.countText}>
                         {searchQuery.trim() || pensionFilter !== 'All'
@@ -259,7 +229,6 @@ export default function RecordsListScreen() {
                 </View>
             </View>
 
-            {/* Records list */}
             <FlatList
                 data={records}
                 keyExtractor={(item) => String(item.id)}
@@ -292,7 +261,6 @@ export default function RecordsListScreen() {
                 keyboardShouldPersistTaps="handled"
             />
 
-            {/* Import CSV button */}
             <TouchableOpacity
                 style={styles.importFab}
                 onPress={handleImport}
@@ -309,7 +277,6 @@ export default function RecordsListScreen() {
                 )}
             </TouchableOpacity>
 
-            {/* Export to CSV — Floating Action Button */}
             {totalCount > 0 && (
                 <TouchableOpacity
                     style={styles.fab}
@@ -439,11 +406,11 @@ const styles = StyleSheet.create({
     importFab: {
         position: 'absolute',
         right: 16,
-        bottom: 80, // sits above the export FAB
+        bottom: 80,
         flexDirection: 'row',
         alignItems: 'center',
         gap: 8,
-        backgroundColor: '#16a34a', // green
+        backgroundColor: '#16a34a',
         paddingHorizontal: 20,
         paddingVertical: 14,
         borderRadius: 28,

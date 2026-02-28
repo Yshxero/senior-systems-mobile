@@ -1,11 +1,3 @@
-/**
- * RecordCard.tsx
- *
- * A reusable card component that displays a single senior citizen record.
- * Shows the name, birthday, contact info, and a delete button.
- * Uses a modern card design with subtle shadows and rounded corners.
- */
-
 import React from 'react';
 import {
     View,
@@ -20,38 +12,31 @@ import { SeniorRecord } from '../lib/database';
 import { useRouter } from 'expo-router';
 
 interface RecordCardProps {
-    /** The senior record data to display */
     record: SeniorRecord;
-    /** Callback fired when the delete button is pressed and confirmed */
     onDelete: (id: number) => void;
 }
 
-/** Month names for displaying birthdays more readably */
 const MONTHS = [
     'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
     'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
 ];
 
 export default function RecordCard({ record, onDelete }: RecordCardProps) {
-    // Format the full name (include ext name like "Jr." if present)
     const fullName = [
         record.last_name,
         record.first_name,
         record.middle_name,
         record.ext_name,
     ]
-        .filter(Boolean) // Remove empty strings
-        .join(', ');      // Format as "Last, First Middle Ext"
+        .filter(Boolean)
+        .join(', ');
 
-    // Format the birthday for display
     const monthIndex = parseInt(record.birthday_month, 10) - 1;
     const monthName = MONTHS[monthIndex] || record.birthday_month;
     const birthday = `${monthName} ${record.birthday_day}, ${record.birthday_year}`;
 
-    // Handle edit action
     const router = useRouter();
     const handleEdit = () => {
-        // TODO: Implement edit functionality
         console.log('Edit record ID:', record.id);
         router.push({
             pathname: '/edit',
@@ -59,7 +44,6 @@ export default function RecordCard({ record, onDelete }: RecordCardProps) {
         });
     };
 
-    // Confirm before deleting
     const handleDelete = () => {
         Alert.alert(
             'Delete Record',
@@ -77,7 +61,6 @@ export default function RecordCard({ record, onDelete }: RecordCardProps) {
 
     return (
         <View style={styles.card}>
-            {/* Header row: Name + Delete button */}
             <View style={styles.header}>
                 <View style={styles.nameContainer}>
                     <Text style={styles.name} numberOfLines={1}>
@@ -106,7 +89,6 @@ export default function RecordCard({ record, onDelete }: RecordCardProps) {
                 </TouchableOpacity>
             </View>
 
-            {/* Info rows */}
             <View style={styles.infoGrid}>
                 <InfoItem icon="calendar-outline" label="Birthday" value={birthday} />
                 <InfoItem icon="person-outline" label="Sex" value={record.sex} />
@@ -117,7 +99,6 @@ export default function RecordCard({ record, onDelete }: RecordCardProps) {
                 <InfoItem icon="wallet-outline" label="Pension" value={record.pension || 'N/A'} />
             </View>
 
-            {/* Footer: Record ID and creation date */}
             <View style={styles.footer}>
                 <Text style={styles.footerText}>ID: #{record.id}</Text>
                 <Text style={styles.footerText}>
@@ -128,7 +109,6 @@ export default function RecordCard({ record, onDelete }: RecordCardProps) {
     );
 }
 
-/** A small helper component for displaying an icon + label + value row */
 function InfoItem({
     icon,
     label,
@@ -156,7 +136,6 @@ const styles = StyleSheet.create({
         padding: 16,
         marginHorizontal: 16,
         marginVertical: 6,
-        // Subtle border for depth
         borderWidth: 1,
         borderColor: Colors.border,
     },

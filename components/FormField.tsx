@@ -1,10 +1,3 @@
-/**
- * FormField.tsx
- *
- * A reusable form input component with label, optional required marker,
- * validation error display, and consistent styling across the app.
- */
-
 import React from 'react';
 import {
     View,
@@ -16,11 +9,8 @@ import {
 import Colors from '../constants/Colors';
 
 interface FormFieldProps extends TextInputProps {
-    /** Label text displayed above the input */
     label: string;
-    /** Whether this field is required (shows a red asterisk) */
     required?: boolean;
-    /** Validation error message to display below the input */
     error?: string;
 }
 
@@ -33,13 +23,11 @@ export default function FormField({
 }: FormFieldProps) {
     return (
         <View style={styles.container}>
-            {/* Label row */}
             <View style={styles.labelRow}>
                 <Text style={styles.label}>{label}</Text>
                 {required && <Text style={styles.required}>*</Text>}
             </View>
 
-            {/* Text input */}
             <TextInput
                 style={[
                     styles.input,
@@ -51,7 +39,6 @@ export default function FormField({
                 {...textInputProps}
             />
 
-            {/* Error message */}
             {error ? (
                 <Text style={styles.errorText}>{error}</Text>
             ) : null}
